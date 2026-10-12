@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LeetCode Anki",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Spaced repetition for LeetCode problems.",
   "browser_specific_settings": {
     "gecko": { "id": "leetcode-anki@delmundo.dev", "strict_min_version": "115.0" }
