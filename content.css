@@ -1,0 +1,12 @@
+#lca-panel {
+  position: fixed; right: 16px; bottom: 16px; z-index: 99999;
+  background: #1e1e1e; color: #eee; border: 1px solid #444; border-radius: 8px;
+  padding: 10px 12px; font: 13px sans-serif; box-shadow: 0 2px 10px rgba(0,0,0,.4);
+}
+#lca-panel .lca-title { margin-bottom: 6px; font-weight: 600; }
+#lca-panel .lca-row { display: flex; gap: 6px; }
+#lca-panel button {
+  background: #333; color: #eee; border: 1px solid #555; border-radius: 4px;
+  padding: 4px 8px; cursor: pointer;
+}
+#lca-panel button:hover { background: #444; }

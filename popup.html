@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { width: 320px; font: 13px sans-serif; margin: 10px; }
+    h1 { font-size: 15px; margin: 0 0 8px; }
+    ul { list-style: none; padding: 0; margin: 0 0 10px; max-height: 260px; overflow: auto; }
+    li { padding: 4px 0; border-bottom: 1px solid #8884; }
+    li small { color: #888; }
+    .actions { display: flex; gap: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Due today: <span id="count">0</span> / <span id="total">0</span></h1>
+  <ul id="list"></ul>
+  <div class="actions">
+    <button id="export">Export</button>
+    <button id="import">Import</button>
+    <input id="file" type="file" accept="application/json" hidden>
+  </div>
+  <script src="scheduler.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
