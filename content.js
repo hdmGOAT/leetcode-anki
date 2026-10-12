@@ -3,6 +3,63 @@ const RATINGS = ["Again", "Hard", "Good", "Easy"];
 let currentSlug = null;
 let listOpen = false;
 let undo = null; // { prev, label } for the card just rated, cleared on navigation
+let ui = { collapsed: false, x: null, y: null }; // persisted panel state
+
+async function loadUi() {
+  const { ui: saved } = await browser.storage.local.get("ui");
+  ui = { ...ui, ...saved };
+}
+
+function saveUi() {
+  return browser.storage.local.set({ ui });
+}
+
+function applyPosition(panel) {
+  if (ui.x === null) return;
+  const x = Math.min(Math.max(0, ui.x), window.innerWidth - panel.offsetWidth);
+  const y = Math.min(Math.max(0, ui.y), window.innerHeight - panel.offsetHeight);
+  Object.assign(panel.style, { left: x + "px", top: y + "px", right: "auto", bottom: "auto" });
+}
+
+function makeHeader(panel) {
+  const header = document.createElement("div");
+  header.className = "lca-header";
+  const name = document.createElement("span");
+  name.textContent = "LeetCode Anki";
+  const toggle = button(ui.collapsed ? "+" : "\u2013", (e) => {
+    e.stopPropagation();
+    ui.collapsed = !ui.collapsed;
+    saveUi();
+    render();
+  });
+  toggle.className = "lca-collapse";
+  toggle.title = ui.collapsed ? "Expand" : "Collapse";
+  header.append(name, toggle);
+
+  header.onpointerdown = (e) => {
+    if (e.target === toggle) return;
+    const rect = panel.getBoundingClientRect();
+    const dx = e.clientX - rect.left;
+    const dy = e.clientY - rect.top;
+    header.setPointerCapture(e.pointerId);
+    header.onpointermove = (m) => {
+      ui.x = m.clientX - dx;
+      ui.y = m.clientY - dy;
+      applyPosition(panel);
+    };
+    header.onpointerup = () => {
+      header.onpointermove = header.onpointerup = null;
+      if (ui.x !== null) {
+        // store the clamped position actually applied
+        const r = panel.getBoundingClientRect();
+        ui.x = r.left;
+        ui.y = r.top;
+      }
+      saveUi();
+    };
+  };
+  return header;
+}
 
 function slugFromPath() {
   const m = location.pathname.match(/^\/problems\/([^/]+)/);
@@ -58,12 +115,20 @@ async function render() {
   const panel = existing || Object.assign(document.createElement("div"), { id: PANEL_ID });
   panel.textContent = "";
 
+  panel.append(makeHeader(panel));
+  panel.classList.toggle("lca-collapsed", ui.collapsed);
+  if (ui.collapsed) {
+    if (!existing) document.body.append(panel);
+    applyPosition(panel);
+    return;
+  }
+
   const title = document.createElement("div");
   title.className = "lca-title";
   panel.append(title);
 
   if (!card) {
-    title.textContent = "LeetCode Anki";
+    title.textContent = "Not in your reviews yet";
     panel.append(button("Add to reviews", async () => {
       await saveCard(newCard(slug));
       render();
@@ -101,6 +166,7 @@ async function render() {
   if (listOpen) panel.append(dueList(cards, slug));
 
   if (!existing) document.body.append(panel);
+  applyPosition(panel);
 }
 
 // LeetCode is a SPA, so watch for URL changes.
@@ -111,4 +177,4 @@ setInterval(() => {
     render();
   }
 }, 500);
-render();
+loadUi().then(render);
